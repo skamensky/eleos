@@ -1,0 +1,17 @@
+[[playbook]]
+playbook_id = "incident_support_supabase"
+version = "1.0.0"
+case_class = "incident"
+sql_file = "test_env/supabase/playbooks/supabase_starter_playbooks.sql"
+
+[[playbook]]
+playbook_id = "billing_support_supabase"
+version = "1.0.0"
+case_class = "billing"
+sql_file = "test_env/supabase/playbooks/supabase_starter_playbooks.sql"
+
+[[playbook]]
+playbook_id = "general_support_supabase"
+version = "1.0.0"
+case_class = "general"
+sql_file = "test_env/supabase/playbooks/supabase_starter_playbooks.sql"

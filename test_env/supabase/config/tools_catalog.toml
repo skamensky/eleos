@@ -1,0 +1,41 @@
+[[tool]]
+tool_name = "supabase/log_scan"
+function_description = "Scan support log records and summarize dominant error signatures."
+source_definition = "SELECT level, message, request_id, user_id, created_at FROM public.support_app_logs WHERE created_at >= now() - interval '24 hours' ORDER BY created_at DESC LIMIT 500;"
+input_schema = { type = "object", properties = { objective = { type = "string" }, reason = { type = "string" } } }
+input_field_map = { objective = "objective", reason = "reason" }
+
+[[tool]]
+tool_name = "supabase/function_runs"
+function_description = "Inspect function run outcomes, latency, and error clusters."
+source_definition = "SELECT function_name, status, latency_ms, error_class, version, started_at FROM public.support_function_runs WHERE started_at >= now() - interval '24 hours' ORDER BY started_at DESC LIMIT 500;"
+input_schema = { type = "object", properties = { objective = { type = "string" }, step = { type = "string" } } }
+input_field_map = { objective = "objective", step = "step" }
+
+[[tool]]
+tool_name = "supabase/auth_timeline"
+function_description = "Build auth/session timeline for incident investigation."
+source_definition = "SELECT user_id, event_type, provider, status, detail, occurred_at FROM public.support_auth_events ORDER BY occurred_at DESC LIMIT 500;"
+input_schema = { type = "object", properties = { objective = { type = "string" }, evidence_id = { type = "string" } } }
+input_field_map = { objective = "objective", evidence_id = "evidence_id" }
+
+[[tool]]
+tool_name = "supabase/access_path_explain"
+function_description = "Summarize access-path denials and likely RLS/policy causes from support access events."
+source_definition = "SELECT actor_id, resource, action, allowed, denial_reason, occurred_at FROM public.support_access_events ORDER BY occurred_at DESC LIMIT 500;"
+input_schema = { type = "object", properties = { objective = { type = "string" }, reason = { type = "string" } } }
+input_field_map = { objective = "objective", reason = "reason" }
+
+[[tool]]
+tool_name = "supabase/metadata_api_inspect"
+function_description = "Inspect schema/table/column/index metadata via Supabase metadata API wrapper."
+source_definition = "GET /schemas, /tables, /columns, /extensions on Supabase metadata API with allowlisted resources only."
+input_schema = { type = "object", properties = { resource = { type = "string", enum = ["schemas", "tables", "columns", "extensions"] }, schema = { type = "string" } } }
+input_field_map = { objective = "objective" }
+
+[[tool]]
+tool_name = "supabase/sql_readonly"
+function_description = "Execute allowlisted read-only SQL for support diagnostics."
+source_definition = "Read-only SQL execution on support datasets with transaction_read_only enforced."
+input_schema = { type = "object", properties = { objective = { type = "string" }, sql = { type = "string" } } }
+input_field_map = { objective = "objective" }

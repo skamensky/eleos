@@ -1,0 +1,74 @@
+services:
+  supabase-db:
+    image: postgres:16
+    container_name: supabase-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - supabase_db_data:/var/lib/postgresql/data
+
+  meta:
+    image: supabase/postgres-meta:v0.96.0
+    container_name: supabase-meta
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: supabase-db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: postgres
+      PG_META_DB_PASSWORD: postgres
+
+  rest:
+    image: postgrest/postgrest:latest
+    container_name: supabase-rest
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://postgres:postgres@supabase-db:5432/postgres
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: postgres
+      PGRST_OPENAPI_MODE: follow-privileges
+
+  auth:
+    image: supabase/gotrue:v2.187.0
+    container_name: supabase-auth
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      GOTRUE_DB_DRIVER: postgres
+      DATABASE_URL: postgres://postgres:postgres@supabase-db:5432/postgres?sslmode=disable
+      GOTRUE_SITE_URL: http://localhost:3000
+      API_EXTERNAL_URL: http://localhost:9999
+      GOTRUE_JWT_SECRET: super-secret-jwt-token-with-at-least-32-chars
+      GOTRUE_DISABLE_SIGNUP: "false"
+
+  studio:
+    image: supabase/studio:latest
+    container_name: supabase-studio
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_PASSWORD: postgres
+      SUPABASE_URL: http://rest:3000
+      SUPABASE_ANON_KEY: test-anon-key
+      SUPABASE_SERVICE_KEY: test-service-key
+      AUTH_JWT_SECRET: super-secret-jwt-token-with-at-least-32-chars
+
+volumes:
+  supabase_db_data:

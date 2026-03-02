@@ -1,0 +1,60 @@
+services:
+  eleos-db:
+    image: postgres:16
+    container_name: eleos-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - eleos_db_data:/var/lib/postgresql/data
+
+  mcp-supabase-example:
+    build:
+      context: ../..
+      dockerfile: test_env/supabase/mcp_supabase_example/Dockerfile
+    container_name: mcp-supabase-example
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+      meta:
+        condition: service_started
+    environment:
+      MCP_DB_DSN: postgresql://app_user:app_user@supabase-db:5432/postgres
+      MCP_META_BASE_URL: http://meta:8080
+    ports:
+      - "8090:8080"
+
+  eleos-api:
+    build:
+      context: ../..
+      dockerfile: test_env/supabase/Dockerfile.eleos
+    container_name: eleos-api-supabase
+    depends_on:
+      eleos-db:
+        condition: service_healthy
+      mcp-supabase-example:
+        condition: service_started
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ELEOS_API_CORS_ORIGINS: "*"
+      ELEOS_UI_DIST_PATH: /workspace/web-dist
+      ELEOS_PERSISTENCE__DSN: postgresql+psycopg://postgres:postgres@eleos-db:5432/postgres
+      ELEOS_PERSISTENCE__DB_SCHEMA: experiment
+      ELEOS_TOOLS__CATALOG_PATH: /workspace/test_env/supabase/config/tools_catalog.toml
+      ELEOS_TOOLS__MCP_SERVERS: >-
+        [{"server_id":"supabase","enabled":true,"transport":{"type":"streamable_http","url":"http://mcp-supabase-example:8080/invoke","connect_timeout_seconds":5,"read_timeout_seconds":30,"verify_tls":false},"declared_tools":["log_scan","function_runs","auth_timeline","access_path_explain","metadata_api_inspect","sql_readonly"],"tool_name_prefix":"supabase/","initialize_timeout_seconds":10,"request_timeout_seconds":30,"max_retries":1,"retry_backoff_seconds":0.2}]
+      ELEOS_CLASSIFICATION__CATEGORIES: >-
+        [{"category_id":"incident","description":"Service incidents and operational degradations.","required_tool_references":["supabase/log_scan","supabase/function_runs"],"suggested_tool_references":["supabase/access_path_explain","supabase/metadata_api_inspect"]},{"category_id":"billing","description":"Billing and usage anomalies.","required_tool_references":["supabase/sql_readonly"],"suggested_tool_references":["supabase/function_runs","supabase/log_scan"]},{"category_id":"general","description":"General support investigations.","required_tool_references":["supabase/log_scan"],"suggested_tool_references":["supabase/auth_timeline","supabase/access_path_explain","supabase/metadata_api_inspect"]}]
+    ports:
+      - "8080:8080"
+    command: >
+      bash -lc "uv run uvicorn eleos.api.app:app --host 0.0.0.0 --port 8080"
+
+volumes:
+  eleos_db_data:
