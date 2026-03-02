@@ -1,7 +1,7 @@
 # Repo Tracking and Requirement Mapping (Discovery + Deep Dive)
 
-Status: Mixed phase. P1 high-signal deep dives completed; coding-assistant runtime deep dive added.
-Last updated: 2026-02-26
+Status: Mixed phase. P1 high-signal deep dives completed; coding-assistant runtime and causal-LLM deep dives added.
+Last updated: 2026-03-02
 
 ## Requirement Key
 - `R1`: Goal-driven planning loop
@@ -33,6 +33,7 @@ Last updated: 2026-02-26
 | `openai/swarm` | Lightweight handoff ideas; useful as conceptual baseline | `R8,R1` | Medium-Low | P4 | Watchlist |
 | `openai/codex` | Production coding-agent control-plane patterns: tool governance, durability, delegation, compaction | `R2,R3,R4,R6,R8` | High | P1 | Deep-dive complete (`Keep`) |
 | `archestra-ai/archestra` | MCP-native gateway/orchestration + security/governance angle | `R6,R4` | Medium | P2 | Candidate |
+| `py-why/pywhyllm` | LLM-assisted causal-structure suggestion toolkit (confounders/mediators/IV/negative controls + CauseNet RAG) | `R7` | Medium | P2 | Deep-dive complete (`Watch`) |
 
 ## Early Gaps (Across Repos vs Our Needs)
 - No repo looked like a direct match for a first-class hypothesis/evidence ledger tied to confidence deltas (`R3`,`R7`) in an incident context.
