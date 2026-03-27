@@ -1,12 +1,13 @@
 # Cross-Repo Comparison (Draft)
 
 Status: Draft comparison (pending)
-Date: 2026-03-02
+Date: 2026-03-26
 
 ## Current High-Signal Set
 - `langchain-ai/langgraph` (`Keep`)
 - `humanlayer/agentcontrolplane` (`Keep`)
 - `IBM/mcp-context-forge` (`Keep`)
+- `facebookresearch/HyperAgents` (`Watch`)
 - `statelyai/agent` (`Watch`)
 - `microsoft/autogen` (`Keep`)
 - `openai/codex` (`Keep`)
@@ -28,10 +29,13 @@ Date: 2026-03-02
 5. `IBM/mcp-context-forge`
 - Best tool governance and policy gateway patterns.
 
-6. `statelyai/agent`
+6. `facebookresearch/HyperAgents`
+- Best source for open-ended stepping-stone search, staged evaluation, and meta-improvement patterns.
+
+7. `statelyai/agent`
 - Strong cognition/state-policy concepts, less complete as production orchestration framework.
 
-7. `py-why/pywhyllm`
+8. `py-why/pywhyllm`
 - Useful causal-reasoning primitives and retrieval ideas, but not a runtime/orchestration substrate.
 
 ## Composite Pattern Stack to Borrow
@@ -39,6 +43,7 @@ Date: 2026-03-02
 - Durable outer loop and task/tool state machines (`agentcontrolplane`).
 - Governance shell for tool routing/auth/policy (`mcp-context-forge`).
 - Operational durability/control details: rollout tiers, read-repair indexing, sub-agent budgets, and parallel-safe tool scheduling (`openai/codex`).
+- Open-ended archive search, staged evaluation, and stepping-stone preservation (`facebookresearch/HyperAgents`).
 - Cognitive state schema (observations/decisions/feedback/insights) (`statelyai/agent`).
 - Causal-structure suggestion primitives for hypothesis discipline (`pywhyllm`).
 
